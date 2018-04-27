@@ -33,7 +33,7 @@
 pacman -Syu
 
 # install a comfortable work environment
-pacman -S yaourt zsh grml-zsh-config vim htop lsof strace
+pacman -S vim htop lsof strace
 
 # install development tools, needed only for Tor (? check this ?)
 #pacman -S base-devel
@@ -43,9 +43,6 @@ pacman -S dnsmasq
 
 # Install Tor
 pacman -S tor
-
-# install an HTTP proxy, optional
-pacman -S polipo
 
 # logrunner & tlsdate both need to be  built :(
 
