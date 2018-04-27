@@ -60,8 +60,9 @@ systemctl enable rngd
 rm /etc/localtime
 ln -s /usr/share/zoneinfo/UTC /etc/localtime
 
-# set hostname to PORTAL \m/
-echo "portal" > /etc/hostname
+# set hostname to random chars \m/
+tr -dc '[:alpha:]' < /dev/urandom | head -c10 > /etc/hostname
+echo "Hostname: $(cat /etc/hostname)"
 
 # This is the config for Tor, lets set it up:
 cat > /etc/tor/torrc << __TORRC__
