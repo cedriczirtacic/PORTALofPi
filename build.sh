@@ -144,7 +144,7 @@ cat > /etc/iptables/iptables.rules << __IPTABLES__
 :INPUT ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
--A PREROUTING -i wlan1 -p tcp -m tcp --dport 22 -j REDIRECT --to-ports 22
+-A PREROUTING -i wlan1 -m conntrack --ctstate NEW -p tcp -m tcp --dport 22 -j REDIRECT --to-ports 22
 -A PREROUTING -i wlan1 -p tcp -m tcp --tcp-flags FIN,SYN,RST,ACK SYN -j REDIRECT --to-ports 9040
 -A PREROUTING -i wlan1 -p udp -m udp --dport 53 -j REDIRECT --to-ports 9053
 COMMIT
@@ -155,6 +155,7 @@ COMMIT
 :FORWARD DROP [0:0]
 :OUTPUT ACCEPT [64:3712]
 -A INPUT -p icmp -j ACCEPT
+-A INPUT -i wlan1 -m conntrack --ctstate NEW -p tcp -m tcp --dport 22 -j ACCEPT
 -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 -A INPUT -i lo -j ACCEPT
 -A INPUT -i wlan1 -p tcp -m tcp --dport 22 -j ACCEPT
@@ -170,6 +171,26 @@ COMMIT
 __IPTABLES__
 
 systemctl enable iptables.service
+
+# don't start TOR service before create_ap
+cat > /usr/lib/systemd/system/tor.service << __TOR_SERVICE__
+# /usr/lib/systemd/system/tor.service
+[Unit]
+Description=Anonymizing Overlay Network
+After=network-online.target create_ap.service
+
+[Service]
+User=tor
+Type=simple
+ExecStart=/usr/bin/tor -f /etc/tor/torrc
+ExecReload=/usr/bin/kill -HUP $MAINPID
+KillSignal=SIGINT
+LimitNOFILE=8192
+PrivateDevices=yes
+
+[Install]
+WantedBy=multi-user.target
+__TOR_SERVICE__
 
 # turn on tor, and reboot... it should work. 
 systemctl enable tor.service
