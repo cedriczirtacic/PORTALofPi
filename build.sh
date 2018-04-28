@@ -200,3 +200,9 @@ systemctl enable tor.service
 
 # no logs
 sh empty_logs.sh
+
+# change root and alarm passwd
+passwd
+passwd alarm
+
+exit 0
