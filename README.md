@@ -21,3 +21,19 @@ also a Tor SOCKS proxy for explicitly interacting with the Tor network, either
 for more security, or to access a Hidden Service.
 
 The configuration of access to the Internet is left as an exercise to the reader.
+
+My mods
+=======
+
+Uses a wireless AP instead of an ethernet interface to connect to the Pi (More users!). Adapted create_ap instead of using hostapd and dnsmasq directly. Also, all \*.log in /var/log/ point to /dev/null so we don't save any extra info just in case.
+
+### My personal setup
+ * Raspberry Pi Zero W
+ * Alfa AWUS036NEH Wireless USB Adapter
+
+For portability a USB charger will be a good idea.
+
+TODO
+====
+ - [ ] Fix tor service rage quitting because it can't bind to the wlan1 address (create_ap is much slower and systemd is crap).
+ 
