@@ -205,4 +205,7 @@ sh empty_logs.sh
 passwd
 passwd alarm
 
+# only listen for wlan1 incoming ssh connections
+vim "+s/^#ListenAddress 0\.0\.0\.0/ListenAddress 192.168.12.1/g"  +x /etc/ssh/sshd_config 
+
 exit 0
