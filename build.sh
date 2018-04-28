@@ -18,11 +18,11 @@
 
 # PORTAL configuration overview
 #  
-# ((Internet))---[USB]<[Pi]>[wlan0]----((LAN))
+# ((Internet))---[wlan0]<[Pi]>[wlan1]----((LAN))
 #   wlan0: 192.168.12.1
 #        * anything from here can only reach 9050 (Tor proxy) or,
 #        * the transparent Tor proxy 
-#    USB: ???.
+#   wlan0: ???.
 #        * Internet access. You're on your own
 #        * No services exposed here
 
