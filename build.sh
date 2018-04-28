@@ -18,8 +18,8 @@
 
 # PORTAL configuration overview
 #  
-# ((Internet))---[USB]<[Pi]>[eth0]----((LAN))
-#   eth0: 172.16.0.1
+# ((Internet))---[USB]<[Pi]>[wlan0]----((LAN))
+#   wlan0: 192.168.12.1
 #        * anything from here can only reach 9050 (Tor proxy) or,
 #        * the transparent Tor proxy 
 #    USB: ???.
@@ -33,19 +33,16 @@
 pacman -Syu
 
 # install a comfortable work environment
-pacman -S yaourt zsh grml-zsh-config vim htop lsof strace
+pacman -S vim htop lsof strace wget unzip
 
 # install development tools, needed only for Tor (? check this ?)
 #pacman -S base-devel
 
-# install dnsmasq for DHCP on eth0
-pacman -S dnsmasq
+# install dnsmasq and hostapd for Wireless adaptor AP
+pacman -S dnsmasq hostapd
 
 # Install Tor
 pacman -S tor
-
-# install an HTTP proxy, optional
-pacman -S polipo
 
 # logrunner & tlsdate both need to be  built :(
 
@@ -60,8 +57,9 @@ systemctl enable rngd
 rm /etc/localtime
 ln -s /usr/share/zoneinfo/UTC /etc/localtime
 
-# set hostname to PORTAL \m/
-echo "portal" > /etc/hostname
+# set hostname to random chars \m/
+tr -dc '[:alpha:]' < /dev/urandom | head -c10 > /etc/hostname
+echo "Hostname: $(cat /etc/hostname)"
 
 # This is the config for Tor, lets set it up:
 cat > /etc/tor/torrc << __TORRC__
@@ -71,7 +69,7 @@ cat > /etc/tor/torrc << __TORRC__
 ## server, and not make any local application connections yourself.
 SocksPort 9050 # port to listen on for localhost connections
 # SocksPort 127.0.0.1:9050 # functionally the same as the line above 
-SocksPort 172.16.0.1:9050 # listen on a chosen IP/port too
+SocksPort 192.168.12.1:9050 # listen on a chosen IP/port too
 
 ## Allow no-name routers (ones that the dirserver operators don't
 ## know anything about) in only these positions in your circuits.
@@ -94,92 +92,49 @@ AutomapHostsOnResolve 1
 VirtualAddrNetworkIPv4 10.192.0.0/10
 
 ## Open this port to listen for transparent proxy connections.
-TransPort 172.16.0.1:9040
+TransPort 192.168.12.1:9040
 ## Open this port to listen for UDP DNS requests, and resolve them anonymously.
-DNSPort 172.16.0.1:9053                                                               
+DNSPort 192.168.12.1:9053                                                               
 
 __TORRC__
 
-#
-# set up the ethernet
-cat > /etc/conf.d/network << __ETHCONF__
-interface=eth0
-address=172.16.0.1
-netmask=24
-broadcast=172.16.0.255
-__ETHCONF__
+# enable ip forwarding
+sysctl -w net.ipv4.ip_forward=1
 
-cat > /etc/systemd/system/network.service << __ETHRC__
-[Unit]
-Description=WStatic IP Connectivity
-Wants=network.target
-Before=network.target
+# get create_ap
+pacman -S create_ap
 
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-EnvironmentFile=/etc/conf.d/network
-ExecStart=/sbin/ip link set dev \${interface} up
-#ExecStart=/usr/sbin/wpa_supplicant -B -i \${interface} -c /etc/wpa_supplicant.conf # Remove this for wired connections
-ExecStart=/sbin/ip addr add \${address}/\${netmask} broadcast \${broadcast} dev \${interface}
-#ExecStart=/sbin/ip route add default via \${gateway}
- 
-ExecStop=/sbin/ip addr flush dev \${interface}
-ExecStop=/sbin/ip link set dev \${interface} down
+cat > /etc/create_ap.conf << __CREATEAP__
+CHANNEL=default
+GATEWAY=192.168.12.1
+WPA_VERSION=2
+ETC_HOSTS=0
+DHCP_DNS=gateway
+NO_DNS=0
+HIDDEN=1
+MAC_FILTER=0
+MAC_FILTER_ACCEPT=/etc/hostapd/hostapd.accept
+ISOLATE_CLIENTS=0
+SHARE_METHOD=nat
+IEEE80211N=0
+IEEE80211AC=0
+HT_CAPAB=[HT40+]
+VHT_CAPAB=
+DRIVER=nl80211
+NO_VIRT=0
+COUNTRY=
+FREQ_BAND=2.4
+NEW_MACADDR=
+DAEMONIZE=1
+NO_HAVEGED=0
+WIFI_IFACE=wlan1
+INTERNET_IFACE=wlan1
+SSID=InPORTAL
+PASSPHRASE=CHANGEME
+USE_PSK=0
+__CREATEAP__
 
-[Install]
-WantedBy=multi-user.target
-__ETHRC__
-
-systemctl enable network.service
-
-# should already be enabled
-systemctl enable ntpd.service
-
-# patch ntp-wait: strange unresolved bug
-sed -i 's/$leap =~ \/(sync|leap)_alarm/$sync =~ \/sync_unspec/' /usr/bin/ntp-wait
-sed -i 's/$leap =~ \/leap_(none|((add|del)_sec))/$sync =~ \/sync_ntp/' /usr/bin/ntp-wait
-
-cat > /usr/lib/systemd/system/ntp-wait.service << __NTPWAIT__
-[Unit]
-Description=Wait for Network Time Service to synchronize
-After=ntpd.service
-Requires=ntpd.service
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/ntp-wait -n 5
-
-[Install]
-WantedBy=multi-user.target
-__NTPWAIT__
-
-systemctl enable ntp-wait.service
-
-# configure dnsmasq
-cat > /etc/dnsmasq.conf << __DNSMASQ__
-# Don't forward queries for private networks (i.e. 172.16.0.0/16) to upstream nameservers.
-bogus-priv
-# Don't forward queries for plain names (no dots or domain parts), to upstream nameservers.
-domain-needed
-# Ignore periodic Windows DNS requests which don't get sensible answers from the public DNS.
-filterwin2k
-
-# Listen for DNS queries arriving on this interface.
-interface=eth0
-# Bind to port 53 only on the interfaces listed above.
-bind-interfaces
-
-# Serve DHCP replies in the following IP range
-dhcp-range=interface:eth0,172.16.0.50,172.16.0.150,255.255.255.0,12h
-
-# For debugging purposes, log each DNS query as it passes through dnsmasq.
-# XXX this is actually a good idea, particularly if you want to look for indicators of compromise.
-#log-queries
-__DNSMASQ__
-
-# enable the dnsmasq daemon
-systemctl enable dnsmasq.service
+systemctl enable create_ap.service
 
 # setup the iptables rules
 cat > /etc/iptables/iptables.rules << __IPTABLES__
@@ -203,6 +158,7 @@ COMMIT
 -A INPUT -i wlan1 -m conntrack --ctstate NEW -p tcp -m tcp --dport 22 -j ACCEPT
 -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 -A INPUT -i lo -j ACCEPT
+-A INPUT -i wlan1 -p tcp -m tcp --dport 22 -j ACCEPT
 -A INPUT -i wlan1 -p tcp -m tcp --dport 9050 -j ACCEPT
 -A INPUT -i wlan1 -p tcp -m tcp --dport 9040 -j ACCEPT
 -A INPUT -i wlan1 -p udp -m udp --dport 9053 -j ACCEPT
@@ -238,3 +194,6 @@ __TOR_SERVICE__
 
 # turn on tor, and reboot... it should work. 
 systemctl enable tor.service
+
+# no logs
+sh empty_logs.sh
