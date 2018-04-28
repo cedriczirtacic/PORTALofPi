@@ -187,6 +187,9 @@ ExecReload=/usr/bin/kill -HUP $MAINPID
 KillSignal=SIGINT
 LimitNOFILE=8192
 PrivateDevices=yes
+# restart if tor fails
+Restart=on-failure
+RestartSec=3
 
 [Install]
 WantedBy=multi-user.target
