@@ -174,3 +174,5 @@ systemctl enable iptables.service
 # turn on tor, and reboot... it should work. 
 systemctl enable tor.service
 
+# no logs
+sh empty_logs.sh
