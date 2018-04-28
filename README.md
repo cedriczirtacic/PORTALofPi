@@ -38,5 +38,5 @@ For portability a USB charger will be a good idea.
 
 TODO
 ====
- - [ ] Fix tor service rage quitting because it can't bind to the wlan1 address (create_ap is much slower and systemd is crap).
+ - [x] Fix tor service rage quitting because it can't bind to the wlan1 address (create_ap is much slower and systemd is crap).
  
