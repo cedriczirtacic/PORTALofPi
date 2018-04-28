@@ -33,6 +33,9 @@ Uses a wireless AP instead of an ethernet interface to connect to the Pi (More u
 
 For portability a USB charger will be a good idea.
 
+### Notes
+ * Change AP password (search for _CHANGEME_ string).
+
 TODO
 ====
  - [ ] Fix tor service rage quitting because it can't bind to the wlan1 address (create_ap is much slower and systemd is crap).
