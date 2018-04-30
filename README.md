@@ -35,6 +35,10 @@ For portability a USB charger will be a good idea.
 
 ### Notes
  * Change AP password (search for _CHANGEME_ string).
+ * AP will be hidden so search for SSID "InPORTAL" or change it to one of your own (Remember that protocol is WPA2).
+ * Avoid ads and related on client level:
+   * https://github.com/hoshsadiq/adblock-nocoin-list
+   * http://support.it-mate.co.uk/downloads/HOSTS.txt
 
 TODO
 ====
