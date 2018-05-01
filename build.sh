@@ -108,7 +108,7 @@ cat > /etc/create_ap.conf << __CREATEAP__
 CHANNEL=default
 GATEWAY=192.168.12.1
 WPA_VERSION=2
-ETC_HOSTS=0
+ETC_HOSTS=1
 DHCP_DNS=gateway
 NO_DNS=0
 HIDDEN=1
