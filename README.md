@@ -25,7 +25,7 @@ The configuration of access to the Internet is left as an exercise to the reader
 My mods
 =======
 
-Uses a wireless AP instead of an ethernet interface to connect to the Pi (More users!). Adapted create_ap instead of using hostapd and dnsmasq directly. Also, all \*.log in /var/log/ point to /dev/null so we don't save any extra info just in case. Social media and insecure IMs are blocked, PORTALofPi was intended to keep your anonimity.
+Uses a wireless AP instead of an ethernet interface to connect to the Pi (More users!). Adapted create_ap instead of using hostapd and dnsmasq directly. Also, all \*.log in /var/log/ point to /dev/null so we don't save any extra info just in case. Social media and insecure IMs are blocked, PORTALofPi was intended to keep your anonymity.
 
 ### My personal setup
  * Raspberry Pi Zero W
