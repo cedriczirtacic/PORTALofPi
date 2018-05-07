@@ -76,6 +76,8 @@ SocksPort 192.168.12.1:9050 # listen on a chosen IP/port too
 ## Other choices (not advised) are entry,exit,introduction.
 AllowUnverifiedNodes middle,rendezvous
 
+## No _extra_ information logging
+SafeLogging 1
 Log notice syslog
 
 DataDirectory /var/lib/tor
