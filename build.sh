@@ -210,6 +210,10 @@ passwd alarm
 # only listen for wlan1 incoming ssh connections
 vim "+s/^#ListenAddress 0\.0\.0\.0/ListenAddress 192.168.12.1/g"  +x /etc/ssh/sshd_config 
 
+# proxychains for internal use (try to avoid this...)
+pacman -S proxychains
+sed -ie 's@#quiet_mode@quiet_mode@' /etc/proxychains.conf
+
 # no fucking social media, don't use this to be social!
 wget https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/social/hosts
 if [ $? -eq 0 ];then
