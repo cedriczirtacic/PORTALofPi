@@ -39,6 +39,7 @@ For portability a USB charger will be a good idea.
  * Avoid ads and related on client level:
    * https://github.com/hoshsadiq/adblock-nocoin-list
    * http://support.it-mate.co.uk/downloads/HOSTS.txt
+ * Make sure you are prepending `proxychains` before any command that connects to something on the Internet from the device itself (like `curl`).
 
 TODO
 ====
