@@ -197,8 +197,11 @@ RestartSec=3
 WantedBy=multi-user.target
 __TOR_SERVICE__
 
-# turn on tor, and reboot... it should work. 
+# turn on tor
 systemctl enable tor.service
+
+# we don't need this
+systemctl disable systemd-resolved
 
 # no logs
 sh empty_logs.sh
@@ -241,5 +244,5 @@ if [ -e ~/.bash_sessions ];then
     rm -rf ~/.bash_sessions
 fi
 
-# done
+# done and reboot... it should work. 
 exit 0
