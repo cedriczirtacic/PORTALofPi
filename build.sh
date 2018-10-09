@@ -200,8 +200,8 @@ __TOR_SERVICE__
 # turn on tor
 systemctl enable tor.service
 
-# we don't need this
-systemctl disable systemd-resolved
+# we don't need this but it creates resolv.conf, so...
+#systemctl disable systemd-resolved
 
 # no logs
 sh empty_logs.sh
